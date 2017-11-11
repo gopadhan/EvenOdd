@@ -16,13 +16,6 @@ vEgg.Preloader.prototype = {
 		
 		// load spritesheets		
 		this.load.spritesheet('button-play', 'gameassets/images/playbutton.png', 512, 512);
-		this.load.spritesheet('egg1place', 'gameassets/images/eggonesplace.png', 600, 600);
-		this.load.spritesheet('egg10place', 'gameassets/images/eggtensplace.png', 600, 600);
-		this.load.spritesheet('egg100place', 'gameassets/images/egghundredplace.png', 600, 600);
-		this.load.spritesheet('star', 'gameassets/images/star.png', 512, 512);
-		this.load.spritesheet('present', 'gameassets/images/present.png', 512, 512);
-		this.load.spritesheet('ring', 'gameassets/images/ring.png', 512, 512);
-		this.load.spritesheet('chest', 'gameassets/images/chest.png', 512, 512);
 		
 	},
 	create: function(){

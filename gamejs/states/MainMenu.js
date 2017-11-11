@@ -14,6 +14,7 @@ vEgg.MainMenu.prototype = {
 	},
 	startGame: function() {
 		// start the Game state
-		this.state.start('Game');
+		//this.state.start('Game');
+		this.state.start('Addition');
 	}
 };

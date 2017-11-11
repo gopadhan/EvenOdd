@@ -95,7 +95,7 @@ vEgg.Game.prototype = {
 	createQuestion: function(){
 
 		score._lastEventTrackedTime = vGame.time.time;
-				
+		this._firstAttempt = true; 		
 		this._questionNum ++;		
 		this._questionCategory = vGame.rnd.pick([1, 2]);
 		if (Phaser.Math.isOdd(this._questionCategory)) {

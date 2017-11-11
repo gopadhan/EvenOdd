@@ -40,7 +40,8 @@ vEgg.main.prototype = {
 
         this.load.script('Preloader',  'gamejs/states/Preloader.js');
         this.load.script('MainMenu',  'gamejs/states/MainMenu.js');
-        this.load.script('Game',  'gamejs/states/Game.js');        
+        this.load.script('Game',  'gamejs/states/Game.js'); 
+        this.load.script('Addition', 'gamejs/states/Addition.js');        
         
         //console.log('starting......' , this.whoami);
 
@@ -60,7 +61,7 @@ vEgg.main.prototype = {
         this.state.add('Preloader', vEgg.Preloader);
         this.state.add('MainMenu', vEgg.MainMenu);
         this.state.add('Game', vEgg.Game);
-        
+        this.state.add('Addition', vEgg.Addition);        
 		// start the Splash state
 		this.state.start('Preloader');
 	}
