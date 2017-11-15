@@ -48,7 +48,7 @@ var clock = {
     _Group: null,
     _hourHand: null,
     _minuteHand: null,
-    _Level: 0,   //random 0, easy 1 (15 min intervals), medium 2, hard 3
+    _Level: 2,   //random 0, easy 1 (15 min intervals), medium 2(5 Min interval), hard 3(1 min interval)
     _minuteIntervalRange: [1,5,15],
     _minuteInterval: null,
     _Hour: 0,
@@ -93,7 +93,9 @@ this._optionsBoxText = [];
 vEgg.Clock.prototype = {
 
 init: function () {
-
+    clock._positionX = 350;
+    clock._positionY = 350;
+    
 },
 
 create: function(){
