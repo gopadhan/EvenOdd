@@ -59,7 +59,6 @@ var clock = {
     _MinuteMax: 59
 };
 
-var delayInMilliseconds = 1000; //1 second
 
 vEgg.Clock = function(vGame){
 // define needed variables for vEgg.Game
@@ -410,7 +409,7 @@ createOptionSet: function(){
         // }    
         
         //console.log('checking after existance: ', this._circles[2].name);
-    },    
+    }    
             
 };
 

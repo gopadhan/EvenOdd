@@ -1,7 +1,7 @@
 //Score Variables
 var score = {
 				_scoreXPos: vGame.world.centerX * 0.25,
-				_scoreYPos: vGame.world.centerY * 1.3,
+				_scoreYPos: vGame.world.centerY * 1.45,
 				_lastEventTrackedTime: null,
 				_elapsedTime: null,
 				_score: 0,
@@ -9,7 +9,7 @@ var score = {
 			};
 
 
-vEgg.Game = function(vGame){
+vEgg.EvenOdd = function(vGame){
 	// define needed variables for vEgg.Game
 
 	this._questionNum = 0;
@@ -31,7 +31,7 @@ vEgg.Game = function(vGame){
 
 };
 
-vEgg.Game.prototype = {
+vEgg.EvenOdd.prototype = {
 
 	init: function () {
 
@@ -56,7 +56,7 @@ vEgg.Game.prototype = {
 
 		var bar = vGame.add.graphics();
 		bar.beginFill(0x000000, 0.2);
-		bar.drawRect(0, 400, 800, 100);
+		bar.drawRect(0, 450, 800, 100);
 
 		this.createQuestion();
 		//Create the score label

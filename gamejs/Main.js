@@ -40,10 +40,13 @@ vEgg.main.prototype = {
 
         this.load.script('Preloader',  'gamejs/states/Preloader.js');
         this.load.script('MainMenu',  'gamejs/states/MainMenu.js');
-        this.load.script('Game',  'gamejs/states/Game.js'); 
+        this.load.script('EvenOdd',  'gamejs/states/EvenOdd.js'); 
         this.load.script('Addition', 'gamejs/states/Addition.js');     
         this.load.script('Clock', 'gamejs/states/Clock.js'); 
-        this.load.script('Time', 'gamejs/states/Time.js');                        
+        this.load.script('Time', 'gamejs/states/Time.js'); 
+        this.load.script('ReinforcingPlaceValue', 'gamejs/states/ReinforcingPlaceValue.js');
+        
+
         
         //console.log('starting......' , this.whoami);
 
@@ -62,10 +65,11 @@ vEgg.main.prototype = {
         
         this.state.add('Preloader', vEgg.Preloader);
         this.state.add('MainMenu', vEgg.MainMenu);
-        this.state.add('Game', vEgg.Game);
+        this.state.add('EvenOdd', vEgg.EvenOdd);
         this.state.add('Addition', vEgg.Addition);    
         this.state.add('Clock', vEgg.Clock); 
-        this.state.add('Time', vEgg.Time);                      
+        this.state.add('Time', vEgg.Time);  
+        this.state.add('ReinforcingPlaceValue', vEgg.ReinforcingPlaceValue)                    
 		// start the Splash state
 		this.state.start('Preloader');
 	}

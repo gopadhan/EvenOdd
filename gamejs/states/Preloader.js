@@ -15,7 +15,8 @@ vEgg.Preloader.prototype = {
 		 this.load.image('explosion', 'gameassets/images/fission.png');
 		 this.load.image('clockface', 'gameassets/images/ClockFace.png');		
 		 this.load.image('hourhand', 'gameassets/images/HourHand.png');	
-		 this.load.image('minutehand', 'gameassets/images/MinuteHand.png');			 		  
+		 this.load.image('minutehand', 'gameassets/images/MinuteHand.png');		
+		 this.load.image('ball', 'gameassets/images/ball.png');			 	 		  
 		
 		// load spritesheets		
 		this.load.spritesheet('button-play', 'gameassets/images/playbutton.png', 512, 512);
