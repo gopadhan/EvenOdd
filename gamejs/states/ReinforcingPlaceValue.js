@@ -30,6 +30,10 @@ var textStyle = {
     boundsAlignV: "middle" // bounds center align vertically
 };  
 
+
+var counter = 0
+var explicitlyPaused = false
+
 vEgg.ReinforcingPlaceValue = function(vGame){
 
 // define needed variables for this game
@@ -46,13 +50,24 @@ vEgg.ReinforcingPlaceValue = function(vGame){
         BarLength: 250,
         EndoffsetX: 50,
         EndoffsetY: 2,
-        BarText: ['Ones', 'Tens', 'Hundreds', 'Thousands'],
-        Number: [1,3,5,4],
+        BarText: ['Ones', 'Tens', 'Hundreds', 'Thousands'], 
+        MinNumber: null,
+        MaxNumber: null,  
+        BeadNumber: null,  
+        Number: [],
         Bead: null
     };
 
-    this._questionNum = 0;
-    this._questionIndex = null;
+    this._question = {
+        num: 0,
+        index: null,
+        type: [1,2],
+        category: null,
+        placeindex: null,
+        text: null
+    };
+
+
     this._answer = null;
     
     //1st attempt Priase message
@@ -65,7 +80,15 @@ vEgg.ReinforcingPlaceValue = function(vGame){
     
     this._optionsBox = [];
     this._optionsVal = [];
-    this._optionsBoxText = [];    
+    this._optionsBoxText = [];  
+    
+    this.resetTimer;    
+    
+    this.rightAnswerBadge; //sprite image used to show the right answer was selected
+    this.wrongAnswerBadge; //sprite image used to show the Wrong answer was selected
+    this.thumbsUpBadge; //sprite image used to show the right answer was selected within 3 sec
+    
+    this.game_over = false;
 
 };
 
@@ -74,8 +97,16 @@ vEgg.ReinforcingPlaceValue.prototype = {
     init: function () {
         clock._positionX = 350;
         clock._positionY = 350;
+        this._abacus.MinNumber = Math.pow(10, this._abacus.NumberofBars - 1);
+        this._abacus.MaxNumber = Math.pow(10, this._abacus.NumberofBars) -1;        
     },
 
+    preload: function(){
+        this.load.image('rightAnswerBadge','gameassets/images/CorrectAnswer.png');
+        this.load.image('wrongAnswerBadge','gameassets/images/WrongAnswer.png');
+        this.load.image('thumbsUpBadge','gameassets/images/ThumbsUp.png');
+        this.load.atlas("atlas","assets/images/sprites.png","assets/images/sprites.json");
+    },
     create: function(){
                     
 
@@ -97,10 +128,35 @@ vEgg.ReinforcingPlaceValue.prototype = {
         bar.beginFill(0x000000, 0.2);
         bar.drawRect(0, 450, 800, 100);
 
+        this._question.category = Phaser.ArrayUtils.getRandomItem(this._question.type);
+
+            //return Math.pow(10, vEgg.ReinforcingPlaceValue._abacus.NumberofBars);
+        //}, 
         
         this.createQuestion();
         //Create the score label
-        createScore();	       
+        createScore();	    
+        
+
+        this.rightAnswerBadge = this.add.image(this.world.centerX,this.world.centerY,'rightAnswerBadge');
+        this.rightAnswerBadge.anchor.setTo(0.5,0.5);
+        this.rightAnswerBadge.kill();
+
+        this.wrongAnswerBadge = this.add.image(this.world.centerX,this.world.centerY,'wrongAnswerBadge');
+        this.wrongAnswerBadge.anchor.setTo(0.5,0.5);
+        this.wrongAnswerBadge.kill();  
+        
+        this.thumbsUpBadge = this.add.image(this.world.centerX,this.world.centerY,'thumbsUpBadge');
+        this.thumbsUpBadge.anchor.setTo(0.5,0.5);
+        this.thumbsUpBadge.kill();         
+
+        
+        
+        this.resetTimer = this.time.create(false);
+        this.resetTimer.loop(2000,this.AllowTurn,this);  
+        this.game_over = false;
+        console.log('Min Number:', this._abacus.MinNumber);
+        console.log('Max Number:', this._abacus.MaxNumber);
     },
 
 
@@ -121,14 +177,22 @@ vEgg.ReinforcingPlaceValue.prototype = {
     
     createQuestion: function(){
         
-                
-        this._firstAttempt = true;        
-        this._questionNum ++;		
+        this.camera.flash('#000000');        
+        this._firstAttempt = true;     
+        this._question.num ++;
         
-        this._question = 'Find the number shown on the Abacus.'
-        this._question = 'Q' + this._questionNum + ': ' + this._question;
-        this.titleText = vGame.make.text(vGame.world.centerX, 50, this._question, {
-        font: 'bold 30pt TheMinion',
+         if (this._question.category == 1) {
+             this._question.text = 'Find the number shown on the Abacus.'
+         } else { //category ==2
+             this._question.placeindex = vGame.rnd.integerInRange(0,  this._abacus.NumberofBars -1); 
+             this._question.text = 'If you add one more bead to the ' + this._abacus.BarText[this._question.placeindex] + ' place. Then what would be the number?';
+
+         };
+        this._question.text = 'Q' + this._question.num + ': ' + this._question.text;
+        //console.log('text Question:', this._question.text);
+        
+        this.titleText = vGame.make.text(vGame.world.centerX, 50, this._question.text, {
+        font: 'bold 15pt TheMinion',
         fill: '#000102',
         align: 'center'
         });
@@ -168,11 +232,11 @@ vEgg.ReinforcingPlaceValue.prototype = {
 
         var textGroup = vGame.add.group()
 
-        console.log('BaseRectX BaseRectY:', this._abacus.BaseRectX, this._abacus.BaseRectY); 
+        //console.log('BaseRectX BaseRectY:', this._abacus.BaseRectX, this._abacus.BaseRectY); 
 
         var vstyle = { font: "15px Arial", fill: "#ffff00", boundsAlignH: "center", boundsAlignV: "middle"};        
         for (var i = 0; i < this._abacus.NumberofBars; i++){
-            console.log('text XY:', this._abacus.BaseRectX + this._abacus.EndoffsetX + 0.65* this._abacus.BaseRectW - 0.95* gapBetweenBars * i, 1.1* this._abacus.BarLength); 
+            //console.log('text XY:', this._abacus.BaseRectX + this._abacus.EndoffsetX + 0.65* this._abacus.BaseRectW - 0.95* gapBetweenBars * i, 1.1* this._abacus.BarLength); 
             
             //vtext is a child of spritegroup, hence its 0, 0 starts from the top left corner of spritegroup. 
             var vtext = new Phaser.Text(vGame, 0, 0, this._abacus.BarText[i], vstyle);            
@@ -188,17 +252,21 @@ vEgg.ReinforcingPlaceValue.prototype = {
         //console.log('world center:', vGame.world.centerX, vGame.world.centerY); 
         //console.log('world center:', this._abacus.spriteGroup.width, this._abacus.spriteGroup.height); 
         
-        this._abacus.spriteGroup.x = vGame.world.centerX - this._abacus.spriteGroup.width/2;
+        this._abacus.spriteGroup.x = vGame.world.centerX - this._abacus.spriteGroup.width*0.7;
         this._abacus.spriteGroup.y = vGame.world.centerY - this._abacus.spriteGroup.height*0.6;
 
-        for (var i = 0; i < this._abacus.NumberofBars; i++){
-            if (i==0) {
-                this._abacus.Number[i] = vGame.rnd.integerInRange(1, 9);
-            } else {
-                this._abacus.Number[i] = vGame.rnd.integerInRange(0, 9);
-            }
-            
-        };
+        this._abacus.BeadNumber = vGame.rnd.integerInRange(this._abacus.MinNumber , this._abacus.MaxNumber);
+
+        //following array is used to create the bar beads
+        this._abacus.Number = this._abacus.BeadNumber.toString().split("").map(Number);
+        console.log('BeadNumber: ', this._abacus.BeadNumber);
+       
+
+
+        //console.log('answer1: ', this._answer); 
+        //console.log('Number: ', this._abacus.Number[0], this._abacus.Number[1], this._abacus.Number[2], this._abacus.Number[3]);
+
+
 
         for (var i = 0; i < this._abacus.NumberofBars; i++){
             
@@ -225,26 +293,36 @@ vEgg.ReinforcingPlaceValue.prototype = {
     },    
             
     createOptionSet: function(){
-        this._optionsVal[0] = '';
-        this._optionsVal[1] = '';
-        this._optionsVal[2] = '';
-        this._optionsVal[3] = '';
-        
-        var numOffset = vGame.rnd.pick([1, -1]);
-        for (var i = 0; i < this._abacus.Number.length; i++) {
-            if (this._abacus.Number[i] ==0 || this._abacus.Number[i] ==9) {
-                this._optionsVal[0] = this._optionsVal[0] + this._abacus.Number[i]; 
-                this._optionsVal[1] = this._optionsVal[1] + this._abacus.Number[i];
-                this._optionsVal[2] = this._optionsVal[2] + this._abacus.Number[i];
-            } else {
-                this._optionsVal[0] = this._optionsVal[0] + this._abacus.Number[i]; 
-                this._optionsVal[1] = this._optionsVal[1] + (this._abacus.Number[i] +  numOffset);
-                this._optionsVal[2] = this._optionsVal[2] + (this._abacus.Number[i] -  numOffset);  
-            };          
-        };
-        this._optionsVal[3] = Number(this._optionsVal[0])  +  numOffset;
+        var newoption = null;
+        this._optionsVal = [];
+        //one of the option set is the answer
+        this._optionsVal[0] = this._abacus.BeadNumber;
 
-        this._answer = this._optionsVal[0];
+        //generating random options
+        if (this._question.category == 2) {
+            //Question category, add one bead to the bar, and tell the answer, following is adding the bead behind the scene.
+            this._answer = this._abacus.BeadNumber + Math.pow(10, this._question.placeindex);
+            this._optionsVal[1] = this._answer;
+            for (var i = 2; i < 4; i++) { //4 options
+                newoption = this._answer + vGame.rnd.pick([1, -1]) * Math.floor(Math.pow(10, i -1));
+                if (this._optionsVal.includes(newoption)) {
+                    console.log('Same options: ', this._optionsVal[0], this._optionsVal[1], this._optionsVal[2], this._optionsVal[3]); 
+                    newoption = newoption + 2 * vGame.rnd.pick([1, -1]) * Math.floor(Math.pow(10, i -1));                    
+                };
+                this._optionsVal[i] = newoption;
+            };            
+        } else {
+            this._answer = this._abacus.BeadNumber;
+            for (var i = 1; i < 4; i++) { //4 options
+                newoption = this._answer + vGame.rnd.pick([1, -1]) * Math.floor(Math.pow(10, i -1));
+                if (this._optionsVal.includes(newoption)) {
+                    console.log('Same options: ', this._optionsVal[0], this._optionsVal[1], this._optionsVal[2], this._optionsVal[3]); 
+                    newoption = newoption + 2 * vGame.rnd.pick([1, -1]) * Math.floor(Math.pow(10, i -1));                
+                };
+                this._optionsVal[i] = newoption;
+            };             
+        };
+
         console.log('opt: ', this._optionsVal[0], this._optionsVal[1], this._optionsVal[2], this._optionsVal[3]);      
 
         this._optionsVal.sort(function(a, b){return 0.5 - Math.random()});
@@ -318,85 +396,151 @@ vEgg.ReinforcingPlaceValue.prototype = {
         clickAnswer: function(sprite, pointer){
             //console.log('Val Parameter:', sprite.name); 
             //return function () {
-                //alert(val);
-                console.log('Val Parameter:', sprite.name); 
-                console.log('Val Answer:', this._answer);  
-                //console.log('Val 1st attempt:', firstattempt); 
+            //alert(val);
+            //console.log('Val Parameter:', sprite.name); 
+            //console.log('Val Answer:', this._answer);  
+            //console.log('Val 1st attempt:', firstattempt)
+
+
+            for (var i =0 ; i < 4; i ++) {
+                this._optionsBox[i].inputEnabled = false;
+                this._optionsBox[i].input.useHandCursor = false;
+            };
+            this.game.canvas.style.cursor = "default";
+            this._textMessage.destroy();
+            
+            var style = { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+            
+    
+            if (sprite.name == this._answer){
+                score._elapsedTime = vGame.time.elapsedSecondsSince(score._lastEventTrackedTime);
+                var item = Phaser.ArrayUtils.getRandomItem(this._firstAttempt ? this._praiseMessage1 : this._praiseMessage2 );
+                //console.log(item);
+                //sprite.tint = 0x008000;	
+                this._inputEnabled = false;	
+                // alert("YOU WIN, CONGRATULATIONS!");
+                // document.location.reload();		
+    
+                var newScore = 5;
                 
-                this._textMessage.destroy();
-                
-                        var style = { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
-                        
-                
-                        if (sprite.name == this._answer){
-                            score._elapsedTime = vGame.time.elapsedSecondsSince(score._lastEventTrackedTime);
-                            var item = Phaser.ArrayUtils.getRandomItem(this._firstAttempt ? this._praiseMessage1 : this._praiseMessage2 );
-                            //console.log(item);
-                            //sprite.tint = 0x008000;	
-                            this._inputEnabled = false;	
-                            // alert("YOU WIN, CONGRATULATIONS!");
-                            // document.location.reload();		
-                
-                            var newScore = 5;
-                            
-                            if (newScore - vGame.math.roundTo(score._elapsedTime) <= 0) {
-                                newScore = 1;
-                            }
-                            else{
-                                newScore = newScore - vGame.math.roundTo(score._elapsedTime);
-                            }
-                        
-                            if (newScore >= 2) {
-                                emitter = vGame.add.emitter(pointer.X, pointer.Y, 100);
-                                
-                                    emitter.makeParticles('explosion');
-                                    emitter.minParticleSpeed.setTo(-300, 30);
-                                    emitter.maxParticleSpeed.setTo(300, 100);
-                                    emitter.minParticleScale = 0.05;
-                                    emitter.maxParticleScale = 0.1;
-                                    emitter.gravity = 250;
-                                    //flow(lifespan, frequency, quantity, total, immediate)
-                                    emitter.flow(1000, 500, 5, 10, true);
-                            }
-                
-                            createScoreAnimation(pointer.x, pointer.y, '+'+newScore, newScore);
-                            
-                            this.destroyQuestion();
-                            this.createQuestion();	
-                            
-                        } else {
-                            console.log('Please try again.');
-                            //sprite.tint = 0xFFA500;
-                            item = 'Please try again.'
-                            this._firstAttempt = false;
-                        }
-                
-                        //  The Text is positioned at 0, 400
-                        this._textMessage = vGame.add.text(0, 0, item, style);
-                        this._textMessage.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+                if (newScore - vGame.math.roundTo(score._elapsedTime) <= 0) {
+                    newScore = 1;
+                }
+                else{
+                    newScore = newScore - vGame.math.roundTo(score._elapsedTime);
+                };
+            
+                if (newScore >= 2) {
+                    emitter = vGame.add.emitter(pointer.X, pointer.Y, 100);
                     
-                        //  We'll set the bounds to be from x0, y400 and be 800px wide by 100px high
-                        this._textMessage.setTextBounds(0, 450, 800, 100);	
+                        emitter.makeParticles('explosion');
+                        emitter.minParticleSpeed.setTo(-300, 30);
+                        emitter.maxParticleSpeed.setTo(300, 100);
+                        emitter.minParticleScale = 0.05;
+                        emitter.maxParticleScale = 0.1;
+                        emitter.gravity = 250;
+                        //flow(lifespan, frequency, quantity, total, immediate)
+                        emitter.flow(1000, 500, 5, 10, true);
+                };
+    
+                createScoreAnimation(pointer.x, pointer.y, '+'+newScore, newScore);
+
+
+                this._abacus.spriteGroup.alpha = 0.5;
+                option._group.alpha = 0.5;
+
+
+                if (vGame.math.roundTo(score._elapsedTime) <= 3) {
+                    this.thumbsUpBadge.reset(this.world.centerX,this.world.centerY);
+                    this.thumbsUpBadge.scale.set(0.7);
+                    this.thumbsUpBadge.alpha = 0.5;
+                    vGame.world.bringToTop(this.thumbsUpBadge);
+                    //to(properties, duration, ease, autoStart, delay, repeat, yoyo)
+                    this.game.add.tween(this.thumbsUpBadge).to({alpha: 1}, 400, Phaser.Easing.Linear.None, true, 0, 100, true);
+
+                } else {
+                    this.rightAnswerBadge.reset(this.world.centerX,this.world.centerY);
+                    this.rightAnswerBadge.scale.set(0.7);
+                    this.rightAnswerBadge.alpha = 0.5;
+                    vGame.world.bringToTop(this.rightAnswerBadge);
+                    //to(properties, duration, ease, autoStart, delay, repeat, yoyo)
+                    this.game.add.tween(this.rightAnswerBadge).to({alpha: 1}, 400, Phaser.Easing.Linear.None, true, 0, 100, true);
+                            
+                };
+                
+
+            } else {
+                //console.log('Please try again.');
+                //sprite.tint = 0xFFA500;
+                item = 'Please try again.'
+                this._firstAttempt = false;
+
+                this.wrongAnswerBadge.reset(this.world.centerX,this.world.centerY);
+                this.wrongAnswerBadge.scale.set(0.7);
+                this._abacus.spriteGroup.alpha = 0.5;
+                option._group.alpha = 0.5;
+                this.wrongAnswerBadge.alpha = 0.5;
+                vGame.world.bringToTop(this.wrongAnswerBadge);
+                //to(properties, duration, ease, autoStart, delay, repeat, yoyo)
+                this.game.add.tween(this.wrongAnswerBadge).to({alpha: 1}, 400, Phaser.Easing.Linear.None, true, 0, 100, true);
+
+            };
+
+            if(!this.resetTimer.running)
+                this.resetTimer.start();
         
-            //};    
+            if(this.resetTimer.paused)
+                this.resetTimer.resume();            
+    
+            //  The Text is positioned at 0, 400
+            this._textMessage = vGame.add.text(0, 0, item, style);
+            this._textMessage.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+        
+            //  We'll set the bounds to be from x0, y400 and be 800px wide by 100px high
+            this._textMessage.setTextBounds(0, 450, 800, 100);	
+
+            //check if token has landed on final grid
+            if(this._question.num == 10){
+                this.game_over = true;
+            };                        
+                                  
         },
         
         destroyQuestion: function(){
             //destroying object instances so we could display the new question
             this.titleText.destroy();
             this._abacus.spriteGroup.destroy(true, false);
-            
+            this._textMessage.destroy();
             option._group.destroy(true, false);
         
-        }, 
+        } 
 
 };
+
+
+vEgg.ReinforcingPlaceValue.prototype.AllowTurn = function(){
+    this.resetTimer.pause();
+    this.rightAnswerBadge.kill();
+    this.thumbsUpBadge.kill(); 
+    this.wrongAnswerBadge.kill(); 
+    this.destroyQuestion();    
+    if (! this.game_over) {
+        this.createQuestion();
+    } else {
+        var scoreFont = "120px Arial";
+        vGame.add.text(50, this.world.centerY-150, 'Game Over!', {font: scoreFont, fill: "#ffffff", stroke: "#535353", strokeThickness: 2});
+        console.log('this.game over: ', score);
+    };
+
+};
+
+
 
 function createScore(){
     
        var scoreFont = "100px Arial";
-	   console.log('this._scoreXPos: ', score._scoreXPos);
-	   console.log('this._scoreYPos: ', score._scoreYPos);
+	   //console.log('this._scoreXPos: ', score._scoreXPos);
+	   //console.log('this._scoreYPos: ', score._scoreYPos);
        //Create the score label, setting score intial value to “0”.
 	   score._scoreLabel = vGame.add.text(score._scoreXPos, score._scoreYPos, "0", {font: scoreFont, fill: "#ffffff", stroke: "#535353", strokeThickness: 15});
 	  //scoreLabel = vGame.add.text(200, 20, "0", {font: scoreFont, fill: "#ffffff", stroke: "#535353", strokeThickness: 15});
