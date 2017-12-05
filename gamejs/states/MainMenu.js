@@ -18,6 +18,7 @@ vEgg.MainMenu.prototype = {
 		//this.state.start('Addition');
 		//this.state.start('Clock');
 		//this.state.start('Time');
-		this.state.start('ReinforcingPlaceValue');
+		//this.state.start('ReinforcingPlaceValue');
+		this.state.start('NumberPyramid');
 	}
 };

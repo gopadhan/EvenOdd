@@ -45,6 +45,7 @@ vEgg.main.prototype = {
         this.load.script('Clock', 'gamejs/states/Clock.js'); 
         this.load.script('Time', 'gamejs/states/Time.js'); 
         this.load.script('ReinforcingPlaceValue', 'gamejs/states/ReinforcingPlaceValue.js');
+        this.load.script('NumberPyramid', 'gamejs/states/NumberPyramid.js');
         
 
         
@@ -69,7 +70,8 @@ vEgg.main.prototype = {
         this.state.add('Addition', vEgg.Addition);    
         this.state.add('Clock', vEgg.Clock); 
         this.state.add('Time', vEgg.Time);  
-        this.state.add('ReinforcingPlaceValue', vEgg.ReinforcingPlaceValue)                    
+        this.state.add('ReinforcingPlaceValue', vEgg.ReinforcingPlaceValue);  
+        this.state.add('NumberPyramid', vEgg.NumberPyramid);                  
 		// start the Splash state
 		this.state.start('Preloader');
 	}

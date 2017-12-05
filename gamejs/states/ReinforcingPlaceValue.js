@@ -62,7 +62,7 @@ vEgg.ReinforcingPlaceValue = function(vGame){
         num: 0,
         index: null,
         type: [1,2],
-        category: null,
+        level: null,
         placeindex: null,
         text: null
     };
@@ -95,8 +95,7 @@ vEgg.ReinforcingPlaceValue = function(vGame){
 vEgg.ReinforcingPlaceValue.prototype = {
     
     init: function () {
-        clock._positionX = 350;
-        clock._positionY = 350;
+
         this._abacus.MinNumber = Math.pow(10, this._abacus.NumberofBars - 1);
         this._abacus.MaxNumber = Math.pow(10, this._abacus.NumberofBars) -1;        
     },
@@ -128,7 +127,7 @@ vEgg.ReinforcingPlaceValue.prototype = {
         bar.beginFill(0x000000, 0.2);
         bar.drawRect(0, 450, 800, 100);
 
-        this._question.category = Phaser.ArrayUtils.getRandomItem(this._question.type);
+        this._question.level = Phaser.ArrayUtils.getRandomItem(this._question.type);
 
             //return Math.pow(10, vEgg.ReinforcingPlaceValue._abacus.NumberofBars);
         //}, 
@@ -181,9 +180,9 @@ vEgg.ReinforcingPlaceValue.prototype = {
         this._firstAttempt = true;     
         this._question.num ++;
         
-         if (this._question.category == 1) {
+         if (this._question.level == 1) {
              this._question.text = 'Find the number shown on the Abacus.'
-         } else { //category ==2
+         } else { //level ==2
              this._question.placeindex = vGame.rnd.integerInRange(0,  this._abacus.NumberofBars -1); 
              this._question.text = 'If you add one more bead to the ' + this._abacus.BarText[this._question.placeindex] + ' place. Then what would be the number?';
 
@@ -299,8 +298,8 @@ vEgg.ReinforcingPlaceValue.prototype = {
         this._optionsVal[0] = this._abacus.BeadNumber;
 
         //generating random options
-        if (this._question.category == 2) {
-            //Question category, add one bead to the bar, and tell the answer, following is adding the bead behind the scene.
+        if (this._question.level == 2) {
+            //Question level, add one bead to the bar, and tell the answer, following is adding the bead behind the scene.
             this._answer = this._abacus.BeadNumber + Math.pow(10, this._question.placeindex);
             this._optionsVal[1] = this._answer;
             for (var i = 2; i < 4; i++) { //4 options
